@@ -38,7 +38,7 @@ public class FirmwareController {
     // UPDATE DEVICE WITH NEWEST FIRMWARE RELEASE
     @PostMapping("/firmware/toit")
     @ResponseStatus(HttpStatus.OK)
-    public String updateFirmware(@RequestParam(name = "firmwareVersion") String version, @RequestParam(name = "deviceUUID") String deviceUUID) {
+    public String updateFirmware(@RequestParam(name = "firmwareVersion", required = false) String version, @RequestParam(name = "deviceUUID") UUID deviceUUID) {
         try {
             return firmwareService.updateFirmware(version, deviceUUID);
         } catch (Exception e) {
