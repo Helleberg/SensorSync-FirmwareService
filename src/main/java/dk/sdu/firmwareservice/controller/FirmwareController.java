@@ -29,7 +29,7 @@ public class FirmwareController {
     }
 
     // GET ALL FIRMWARE RELEASES
-    @GetMapping("/firmware/toit")
+    @GetMapping("/firmware/toit/releases")
     @ResponseStatus(HttpStatus.OK)
     public void getAllFirmwareVersion() {
         // TODO: Implement logic that returns all version from a database or the repo releases.
@@ -44,5 +44,12 @@ public class FirmwareController {
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    // GET ALL FIRMWARE RELEASES
+    @GetMapping("/firmware/toit/download")
+    @ResponseStatus(HttpStatus.OK)
+    public void getNewFirmware() {
+        // TODO: Implement logic that serves the firmware file to the correct ESP32 device.
     }
 }

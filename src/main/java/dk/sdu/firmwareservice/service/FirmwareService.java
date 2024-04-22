@@ -3,6 +3,8 @@ package dk.sdu.firmwareservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.sdu.firmwareservice.dto.DeviceDTO;
 import dk.sdu.firmwareservice.feign.DeviceServiceInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,8 @@ import java.util.zip.GZIPInputStream;
 
 @Component
 public class FirmwareService {
+    private static final Logger log = LoggerFactory.getLogger(FirmwareService.class);
+
     @Value("${toit.sdk.path}")
     private static String TOIT_SDK;
     @Value("${toit.sdk.compiler}")
@@ -54,7 +58,7 @@ public class FirmwareService {
                     // This check relies on Toit not changing their version syntax.
                     // Might need to be checked and made in another way for stability of this system.
                     if (Integer.parseInt(toitVersion.substring(1, toitVersion.lastIndexOf("."))) > Integer.parseInt(deviceDTO.getToit_firmware_version().substring(1, deviceDTO.getToit_firmware_version().lastIndexOf(".")))) {
-                        Boolean isFirmwareGenerated = generateFirmware(toitVersion);
+                        Boolean isFirmwareGenerated = generateFirmware(toitVersion, String.valueOf(deviceUUID));
 
                         if (isFirmwareGenerated) {
                             // TODO: implement logic to serve the firmware to the esp32 with the correct device UUID.
@@ -72,24 +76,27 @@ public class FirmwareService {
                 }
 
             } catch (JsonProcessingException e) {
+                log.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } catch (Exception e) {
+            log.warn(e.getMessage());
             return "Could not get device";
         }
     }
 
-    public Boolean generateFirmware(String firmwareVersion) {
+    public Boolean generateFirmware(String firmwareVersion, String deviceUUID) {
         // TODO: Include ATHENA snapshot somewhere in this logic
         try {
+            // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = ENVELOPE_URL_BASE + firmwareVersion + "/firmware-esp32.gz";
-            downloadFile(envelopeUrl, "firmware.envelope.gz");
-            gunzipFile("firmware.envelope.gz", "firmware.envelope");
+            downloadFile(envelopeUrl, deviceUUID + ".firmware.envelope.gz");
+            gunzipFile(deviceUUID + ".firmware.envelope.gz", deviceUUID + ".firmware.envelope");
             compileToitFile("validate.toit", "validate.snapshot");
-            installContainerToFirmware("firmware.envelope", "validate.snapshot");
+            installContainerToFirmware(deviceUUID + ".firmware.envelope", "validate.snapshot");
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
             return false;
         }
     }
@@ -105,6 +112,8 @@ public class FirmwareService {
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
             }
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
     }
 
@@ -117,6 +126,8 @@ public class FirmwareService {
             while ((bytesRead = gis.read(buffer)) != -1) {
                 fos.write(buffer, 0, bytesRead);
             }
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
     }
 
@@ -125,7 +136,7 @@ public class FirmwareService {
         try {
             process.waitFor();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
         }
     }
 
@@ -135,7 +146,7 @@ public class FirmwareService {
         try {
             process.waitFor();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
         }
     }
 }
