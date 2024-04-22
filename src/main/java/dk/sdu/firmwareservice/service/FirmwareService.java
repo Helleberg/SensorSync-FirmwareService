@@ -3,6 +3,7 @@ package dk.sdu.firmwareservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.sdu.firmwareservice.dto.DeviceDTO;
 import dk.sdu.firmwareservice.feign.DeviceServiceInterface;
+import dk.sdu.firmwareservice.feign.MessageServiceInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,22 +23,16 @@ import java.util.zip.GZIPInputStream;
 public class FirmwareService {
     private static final Logger log = LoggerFactory.getLogger(FirmwareService.class);
 
-    @Value("${toit.sdk.path}")
-    private static String TOIT_SDK;
-    @Value("${toit.sdk.compiler}")
-    private static String TOIT_COMPILE;
-    @Value("${toit.sdk.firmware.tool}")
-    private static String TOIT_FIRMWARE;
-    @Value("${toit.sdk.firmware.download.url}")
-    private static String ENVELOPE_URL_BASE;
-
     @Autowired
     private GitHubService gitHubService;
 
     @Autowired
     private DeviceServiceInterface deviceServiceInterface;
 
-    public String updateFirmware(String firmware, UUID deviceUUID) {
+    @Autowired
+    private MessageServiceInterface messageServiceInterface;
+
+    public void updateFirmware(String firmware, UUID deviceUUID, String jwt) {
         String toitVersion = "";
 
         // Get device from device service
@@ -50,7 +45,7 @@ public class FirmwareService {
                 if (!firmware.isEmpty()) {
                     toitVersion = firmware;
                 } else {
-                    toitVersion = gitHubService.getLatestRelease("toitlang/toit");
+                    toitVersion = gitHubService.getLatestToitRelease();
                 }
 
                 if (toitVersion != null && !toitVersion.isEmpty() && deviceUUID != null) {
@@ -63,25 +58,26 @@ public class FirmwareService {
                         if (isFirmwareGenerated) {
                             // TODO: implement logic to serve the firmware to the esp32 with the correct device UUID.
                             // "Firmware was generated successfully" return is temp and will be removed when sering the firmware is implemented.
-                            return "Firmware was generated successfully";
+                            messageServiceInterface.updateFirmware(deviceUUID, jwt);
+
+                            log.warn("Firmware was generated successfully");
                         } else {
-                            return "Firmware not generated correctly";
+                            log.warn("Firmware not generated correctly");
                         }
                     } else {
-                        return "Current device does not need to update firmware";
+                        log.warn("Current device does not need to update firmware");
                     }
 
                 } else {
-                    return "Update information is missing...";
+                    log.warn("Update information is missing...");
                 }
 
             } catch (JsonProcessingException e) {
-                log.warn(e.getMessage());
+                log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         } catch (Exception e) {
-            log.warn(e.getMessage());
-            return "Could not get device";
+            log.error("Could not get device: {}", e.getMessage());
         }
     }
 
@@ -132,7 +128,7 @@ public class FirmwareService {
     }
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
-        Process process = Runtime.getRuntime().exec("/opt/toit-sdk/bin/toit.compile" + " -w " + outputFile + " " + inputFile);
+        Process process = Runtime.getRuntime().exec("./toit/bin/toit.compile" + " -w " + outputFile + " " + inputFile);
         try {
             process.waitFor();
         } catch (InterruptedException e) {
@@ -142,7 +138,7 @@ public class FirmwareService {
 
     private static void installContainerToFirmware(String envelopeFile, String snapshotFile) throws IOException {
         Process process = Runtime.getRuntime().exec(
-                "/opt/toit-sdk/tools/firmware" + " -e " + envelopeFile + " container install validate " + snapshotFile);
+                "./toit/tools/firmware" + " -e " + envelopeFile + " container install validate " + snapshotFile);
         try {
             process.waitFor();
         } catch (InterruptedException e) {

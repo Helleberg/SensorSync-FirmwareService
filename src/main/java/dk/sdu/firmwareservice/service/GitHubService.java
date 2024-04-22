@@ -21,8 +21,8 @@ public class GitHubService {
         this.objectMapper = objectMapper;
     }
 
-    public String getLatestRelease(String repo) throws JsonProcessingException {
-        ResponseEntity<String> response = restTemplate.getForEntity("https://api.github.com/repos/" + repo + "/releases/latest", String.class);
+    public String getLatestToitRelease() throws JsonProcessingException {
+        ResponseEntity<String> response = restTemplate.getForEntity("https://api.github.com/repos/toitlang/toit/releases/latest", String.class);
         if (response.getStatusCode().is2xxSuccessful()) {
             // Deserialize JSON response into ReleaseInfo POJO
             ReleaseInfo releaseInfo = objectMapper.readValue(response.getBody(), ReleaseInfo.class);

@@ -1,8 +1,9 @@
 package dk.sdu.firmwareservice.controller;
 
-import dk.sdu.firmwareservice.dto.DeviceDTO;
 import dk.sdu.firmwareservice.service.FirmwareService;
 import dk.sdu.firmwareservice.service.GitHubService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,17 +13,19 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1")
 public class FirmwareController {
+    private static final Logger log = LoggerFactory.getLogger(FirmwareService.class);
+
     @Autowired
     GitHubService gitHubService;
     @Autowired
     FirmwareService firmwareService;
 
-    // GET NEWEST FIRMWARE RELEASE
+    // GET NEWEST TOIT FIRMWARE RELEASE
     @GetMapping("/firmware/toit")
     @ResponseStatus(HttpStatus.OK)
-    public String getFirmwareVersion(@RequestParam(name = "repoPath") String repoPath) {
+    public String getFirmwareVersion() {
         try {
-            return gitHubService.getLatestRelease(repoPath);
+            return gitHubService.getLatestToitRelease();
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -38,11 +41,15 @@ public class FirmwareController {
     // UPDATE DEVICE WITH NEWEST FIRMWARE RELEASE
     @PostMapping("/firmware/toit")
     @ResponseStatus(HttpStatus.OK)
-    public String updateFirmware(@RequestParam(name = "firmwareVersion", required = false) String version, @RequestParam(name = "deviceUUID") UUID deviceUUID) {
+    public void updateFirmware(
+            @RequestParam(name = "firmwareVersion", required = false) String version,
+            @RequestParam(name = "deviceUUID") UUID deviceUUID,
+            @RequestParam(name = "jwt") String jwt
+            ) {
         try {
-            return firmwareService.updateFirmware(version, deviceUUID);
+            firmwareService.updateFirmware(version, deviceUUID, jwt);
         } catch (Exception e) {
-            return e.getMessage();
+            log.error(e.getMessage());
         }
     }
 
