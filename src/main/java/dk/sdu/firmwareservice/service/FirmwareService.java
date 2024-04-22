@@ -89,7 +89,7 @@ public class FirmwareService {
         // TODO: Include ATHENA snapshot somewhere in this logic
         try {
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
-            String envelopeUrl = ENVELOPE_URL_BASE + firmwareVersion + "/firmware-esp32.gz";
+            String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
             downloadFile(envelopeUrl, deviceUUID + ".firmware.envelope.gz");
             gunzipFile(deviceUUID + ".firmware.envelope.gz", deviceUUID + ".firmware.envelope");
             compileToitFile("validate.toit", "validate.snapshot");
@@ -132,7 +132,7 @@ public class FirmwareService {
     }
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
-        Process process = Runtime.getRuntime().exec(TOIT_COMPILE + " -w " + outputFile + " " + inputFile);
+        Process process = Runtime.getRuntime().exec("/opt/toit-sdk/bin/toit.compile" + " -w " + outputFile + " " + inputFile);
         try {
             process.waitFor();
         } catch (InterruptedException e) {
@@ -142,7 +142,7 @@ public class FirmwareService {
 
     private static void installContainerToFirmware(String envelopeFile, String snapshotFile) throws IOException {
         Process process = Runtime.getRuntime().exec(
-                TOIT_FIRMWARE + " -e " + envelopeFile + " container install validate " + snapshotFile);
+                "/opt/toit-sdk/tools/firmware" + " -e " + envelopeFile + " container install validate " + snapshotFile);
         try {
             process.waitFor();
         } catch (InterruptedException e) {
