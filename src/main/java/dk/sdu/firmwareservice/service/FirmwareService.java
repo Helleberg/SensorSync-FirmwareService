@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -33,12 +34,9 @@ public class FirmwareService {
     public void updateFirmware(UpdateFirmwareRequest updateFirmwareRequest) {
         String toitVersion = "";
 
-        System.out.println(updateFirmwareRequest);
-
         // Get device from device service
         try {
             DeviceDTO deviceDTO = deviceServiceInterface.getDevice(updateFirmwareRequest.getUuid());
-            System.out.println(deviceDTO);
 
             // Get the latest release version from toit repo
             try {
@@ -90,10 +88,9 @@ public class FirmwareService {
         try {
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
-            downloadFile(envelopeUrl, deviceUUID + ".firmware.envelope.gz");
-            gunzipFile(deviceUUID + ".firmware.envelope.gz", deviceUUID + ".firmware.envelope");
+            downloadFile(envelopeUrl, "firmware.envelope.gz");
+            gunzipFile("firmware.envelope.gz", "firmware.envelope");
             compileToitFile("validate.toit", "validate.snapshot");
-            installContainerToFirmware(deviceUUID + ".firmware.envelope", "validate.snapshot");
             return true;
         } catch (IOException e) {
             log.warn(e.getMessage());
@@ -132,9 +129,10 @@ public class FirmwareService {
     }
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
+        System.out.println("Trying to compile...");
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("toit/bin/toit.compile", "-w", outputFile, inputFile);
-        processBuilder.directory(new File("/"));
+        processBuilder.command("make");
+        processBuilder.directory(new File(System.getProperty("user.dir")));
 
         try {
             Process process = processBuilder.start();
@@ -150,16 +148,6 @@ public class FirmwareService {
             System.err.println("Compilation interrupted: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    private static void installContainerToFirmware(String envelopeFile, String snapshotFile) throws IOException {
-        Process process = Runtime.getRuntime().exec(
-                "./toit/tools/firmware" + " -e " + envelopeFile + " container install validate " + snapshotFile);
-        try {
-            process.waitFor();
-        } catch (InterruptedException e) {
-            log.warn(e.getMessage());
         }
     }
 }
