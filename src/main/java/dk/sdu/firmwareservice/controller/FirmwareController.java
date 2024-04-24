@@ -45,8 +45,8 @@ public class FirmwareController {
     public void updateFirmware(@RequestBody UpdateFirmwareRequest updateFirmwareRequest) {
         try {
             firmwareService.updateFirmware(
-                    updateFirmwareRequest.getFirmwareVersion(),
-                    updateFirmwareRequest.getDeviceUUID(),
+                    updateFirmwareRequest.getToit_firmware_version(),
+                    updateFirmwareRequest.getUuid(),
                     updateFirmwareRequest.getJwt()
             );
         } catch (Exception e) {

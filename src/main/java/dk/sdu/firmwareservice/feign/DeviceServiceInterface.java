@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.UUID;
 
-@FeignClient("device-service")
+@FeignClient("DEVICE-SERVICE")
 public interface DeviceServiceInterface {
-    @GetMapping("/devices/{uuid}")
+    @GetMapping("api/v1/devices/{uuid}")
     @ResponseStatus(HttpStatus.OK)
     public DeviceDTO getDevice(@PathVariable UUID uuid);
 }

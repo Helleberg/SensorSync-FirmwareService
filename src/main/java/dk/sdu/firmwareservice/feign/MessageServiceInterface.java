@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.UUID;
 
-@FeignClient("message-service")
+@FeignClient("MESSAGE-SERVICE")
 public interface MessageServiceInterface {
-    @PostMapping("/message/update")
+    @PostMapping("api/v1/message/update")
     @ResponseStatus(HttpStatus.OK)
     public void updateFirmware(@RequestParam(name = "uuid") UUID uuid, @RequestParam(name = "jwt") String jwt);
 }
