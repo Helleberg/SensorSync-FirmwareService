@@ -1,5 +1,6 @@
 package dk.sdu.firmwareservice.controller;
 
+import dk.sdu.firmwareservice.request_types.UpdateFirmwareRequest;
 import dk.sdu.firmwareservice.service.FirmwareService;
 import dk.sdu.firmwareservice.service.GitHubService;
 import org.slf4j.Logger;
@@ -41,13 +42,13 @@ public class FirmwareController {
     // UPDATE DEVICE WITH NEWEST FIRMWARE RELEASE
     @PostMapping("/firmware/toit")
     @ResponseStatus(HttpStatus.OK)
-    public void updateFirmware(
-            @RequestParam(name = "firmwareVersion", required = false) String version,
-            @RequestParam(name = "deviceUUID") UUID deviceUUID,
-            @RequestParam(name = "jwt") String jwt
-            ) {
+    public void updateFirmware(@RequestBody UpdateFirmwareRequest updateFirmwareRequest) {
         try {
-            firmwareService.updateFirmware(version, deviceUUID, jwt);
+            firmwareService.updateFirmware(
+                    updateFirmwareRequest.getFirmwareVersion(),
+                    updateFirmwareRequest.getDeviceUUID(),
+                    updateFirmwareRequest.getJwt()
+            );
         } catch (Exception e) {
             log.error(e.getMessage());
         }
