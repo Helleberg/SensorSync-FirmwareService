@@ -21,6 +21,13 @@ public class FirmwareController {
     @Autowired
     FirmwareService firmwareService;
 
+    // GET ALL FIRMWARE RELEASES
+    @GetMapping("/firmware/toit/releases")
+    @ResponseStatus(HttpStatus.OK)
+    public void getAllFirmwareVersion() {
+        // TODO: Implement logic that returns all version from a database or the repo releases.
+    }
+
     // GET NEWEST TOIT FIRMWARE RELEASE
     @GetMapping("/firmware/toit")
     @ResponseStatus(HttpStatus.OK)
@@ -30,13 +37,6 @@ public class FirmwareController {
         } catch (Exception e) {
             return e.getMessage();
         }
-    }
-
-    // GET ALL FIRMWARE RELEASES
-    @GetMapping("/firmware/toit/releases")
-    @ResponseStatus(HttpStatus.OK)
-    public void getAllFirmwareVersion() {
-        // TODO: Implement logic that returns all version from a database or the repo releases.
     }
 
     // UPDATE DEVICE WITH NEWEST FIRMWARE RELEASE
@@ -52,12 +52,5 @@ public class FirmwareController {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-    }
-
-    // GET ALL FIRMWARE RELEASES
-    @GetMapping("/firmware/toit/download")
-    @ResponseStatus(HttpStatus.OK)
-    public void getNewFirmware() {
-        // TODO: Implement logic that serves the firmware file to the correct ESP32 device.
     }
 }
