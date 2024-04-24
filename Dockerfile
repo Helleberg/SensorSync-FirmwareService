@@ -4,8 +4,6 @@ EXPOSE 8286
 
 COPY ./target/firmware-service-*.jar firmware-service.jar
 
-COPY ./validate.toit validate.toit
-
 RUN apk --no-cache add curl
 
 RUN TOIT_VERSION=$( \
@@ -17,5 +15,7 @@ RUN TOIT_VERSION=$( \
     && wget -c https://github.com/toitlang/toit/releases/download/$TOIT_VERSION/toit-linux.tar.gz -O - | tar -xz
 
 RUN chmod +x /toit
+
+COPY ./validate.toit ./toit/bin/validate.toit
 
 ENTRYPOINT ["java", "-jar", "firmware-service.jar"]

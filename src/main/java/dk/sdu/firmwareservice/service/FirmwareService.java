@@ -137,20 +137,12 @@ public class FirmwareService {
     }
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
-        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
-
-        // Iterate over the root directories
-        for (Path rootDirectory : rootDirectories) {
-            System.out.println("Root Directory: " + rootDirectory);
-        }
-
-        try (Stream<Path> paths = Files.walk(Paths.get("/"))) {
-            paths.filter(Files::isRegularFile).forEach(System.out::println);
-        }
-
         ProcessBuilder processBuilder = new ProcessBuilder();
+
+        processBuilder.directory(new File("toit/bin"));
+
         processBuilder.directory(new File("/"));
-        processBuilder.command("toit/bin/toit.compile", "-w", outputFile, inputFile);
+        processBuilder.command("./toit.compile", "-w", outputFile, inputFile);
 
         try {
             Process process = processBuilder.start();
