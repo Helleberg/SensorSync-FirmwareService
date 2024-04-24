@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
@@ -135,11 +132,24 @@ public class FirmwareService {
     }
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
-        Process process = Runtime.getRuntime().exec("./toit/bin/toit.compile" + " -w " + outputFile + " " + inputFile);
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("./toit/bin/toit.compile", "-w", outputFile, inputFile);
+        processBuilder.directory(new File("./"));
+
         try {
-            process.waitFor();
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Compilation successful");
+            } else {
+                System.out.println("Compilation failed with exit code: " + exitCode);
+            }
         } catch (InterruptedException e) {
-            log.warn(e.getMessage());
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            System.err.println("Compilation interrupted: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
