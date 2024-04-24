@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -132,9 +134,16 @@ public class FirmwareService {
     }
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
+        Iterable<Path> rootDirectories = FileSystems.getDefault().getRootDirectories();
+
+        // Iterate over the root directories
+        for (Path rootDirectory : rootDirectories) {
+            System.out.println("Root Directory: " + rootDirectory);
+        }
+
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("toit/bin/toit.compile", "-w", outputFile, inputFile);
         processBuilder.directory(new File("/"));
+        processBuilder.command("toit/bin/toit.compile", "-w", outputFile, inputFile);
 
         try {
             Process process = processBuilder.start();
