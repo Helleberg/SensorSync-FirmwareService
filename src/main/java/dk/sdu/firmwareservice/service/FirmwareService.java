@@ -45,13 +45,14 @@ public class FirmwareService {
 
             // Get the latest release version from toit repo
             try {
+                System.out.println("Check if update is given");
                 // Check if update version is given by the user
                 if (!updateFirmwareRequest.getToit_firmware_version().isEmpty()) {
                     toitVersion = updateFirmwareRequest.getToit_firmware_version();
                 } else {
                     toitVersion = gitHubService.getLatestToitRelease();
                 }
-
+                System.out.println("Toit version: " + toitVersion);
                 if (toitVersion != null && !toitVersion.isEmpty() && updateFirmwareRequest.getUuid() != null) {
 
                     // This check relies on Toit not changing their version syntax.
@@ -77,10 +78,12 @@ public class FirmwareService {
                 }
 
             } catch (JsonProcessingException e) {
+                e.printStackTrace();
                 log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Could not get device: {}", e.getMessage());
         }
     }
