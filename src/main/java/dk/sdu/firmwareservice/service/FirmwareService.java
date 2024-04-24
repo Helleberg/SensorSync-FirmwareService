@@ -139,7 +139,7 @@ public class FirmwareService {
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
         ProcessBuilder processBuilder = new ProcessBuilder();
 
-        processBuilder.directory(new File("toit/bin"));
+        processBuilder.directory(new File("/"));
 
         processBuilder.directory(new File("/"));
         processBuilder.command("./toit.compile", "-w", outputFile, inputFile);
