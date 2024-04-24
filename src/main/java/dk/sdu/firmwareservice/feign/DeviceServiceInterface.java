@@ -13,5 +13,5 @@ import java.util.UUID;
 public interface DeviceServiceInterface {
     @GetMapping("api/v1/devices/{uuid}")
     @ResponseStatus(HttpStatus.OK)
-    public DeviceDTO getDevice(@PathVariable UUID uuid);
+    DeviceDTO getDevice(@PathVariable UUID uuid);
 }

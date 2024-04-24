@@ -12,5 +12,5 @@ import java.util.UUID;
 public interface MessageServiceInterface {
     @PostMapping("api/v1/message/update")
     @ResponseStatus(HttpStatus.OK)
-    public void updateFirmware(@RequestParam(name = "uuid") UUID uuid, @RequestParam(name = "jwt") String jwt);
+    void updateFirmware(@RequestParam(name = "uuid") UUID uuid, @RequestParam(name = "jwt") String jwt);
 }
