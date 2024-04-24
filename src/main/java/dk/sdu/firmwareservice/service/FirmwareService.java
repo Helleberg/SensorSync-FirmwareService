@@ -133,8 +133,8 @@ public class FirmwareService {
 
     private static void compileToitFile(String inputFile, String outputFile) throws IOException {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("./toit/bin/toit.compile", "-w", outputFile, inputFile);
-        processBuilder.directory(new File("./"));
+        processBuilder.command("toit/bin/toit.compile", "-w", outputFile, inputFile);
+        processBuilder.directory(new File("/"));
 
         try {
             Process process = processBuilder.start();
