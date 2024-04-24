@@ -55,7 +55,7 @@ public class FirmwareService {
                         if (isFirmwareGenerated) {
                             // TODO: implement logic to serve the firmware to the esp32 with the correct device UUID.
                             // "Firmware was generated successfully" return is temp and will be removed when sering the firmware is implemented.
-                            messageServiceInterface.updateFirmware(updateFirmwareRequest.getUuid(), updateFirmwareRequest.getJwt());
+                            messageServiceInterface.updateFirmware(updateFirmwareRequest);
 
                             log.warn("Firmware was generated successfully");
                         } else {
