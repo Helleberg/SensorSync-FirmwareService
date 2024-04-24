@@ -15,8 +15,11 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 @Component
@@ -139,6 +142,10 @@ public class FirmwareService {
         // Iterate over the root directories
         for (Path rootDirectory : rootDirectories) {
             System.out.println("Root Directory: " + rootDirectory);
+        }
+
+        try (Stream<Path> paths = Files.walk(Paths.get("/"))) {
+            paths.filter(Files::isRegularFile).forEach(System.out::println);
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder();
