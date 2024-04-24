@@ -4,6 +4,8 @@ EXPOSE 8286
 
 COPY ./target/firmware-service-*.jar firmware-service.jar
 
+COPY ./validate.toit validate.toit
+
 RUN apk --no-cache add curl
 
 RUN TOIT_VERSION=$( \
