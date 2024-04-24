@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @FeignClient("MESSAGE-SERVICE")
 public interface MessageServiceInterface {
-    @PostMapping("api/v1/message/update")
+    @PostMapping("api/v1/mqtt/device/update")
     @ResponseStatus(HttpStatus.OK)
     void updateFirmware(@RequestParam(name = "uuid") UUID uuid, @RequestParam(name = "jwt") String jwt);
 }
