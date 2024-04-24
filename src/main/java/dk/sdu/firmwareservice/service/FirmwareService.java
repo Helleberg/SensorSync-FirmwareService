@@ -57,7 +57,7 @@ public class FirmwareService {
 
                     // This check relies on Toit not changing their version syntax.
                     // Might need to be checked and made in another way for stability of this system.
-                    if (Integer.parseInt(toitVersion.substring(1, toitVersion.lastIndexOf("."))) > Integer.parseInt(deviceDTO.getToit_firmware_version().substring(1, deviceDTO.getToit_firmware_version().lastIndexOf(".")))) {
+                    if (Integer.parseInt(toitVersion.substring(toitVersion.lastIndexOf('.') + 1)) > Integer.parseInt(deviceDTO.getToit_firmware_version().substring(deviceDTO.getToit_firmware_version().lastIndexOf('.') + 1))) {
                         Boolean isFirmwareGenerated = generateFirmware(toitVersion, String.valueOf(updateFirmwareRequest.getUuid()));
 
                         if (isFirmwareGenerated) {
