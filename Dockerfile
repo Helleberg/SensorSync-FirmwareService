@@ -32,8 +32,6 @@ RUN TOIT_VERSION=$( \
     && echo $TOIT_VERSION \
     && wget -c https://github.com/toitlang/toit/releases/download/$TOIT_VERSION/toit-linux.tar.gz -O - | tar -xz
 
-RUN mkdir /usr/src/service/athena
-
 RUN ATHENA_VERSION=$( \
     curl --silent "https://api.github.com/repos/Helleberg/SensorSync-AthenaContainer/releases/latest" | \
     grep '"tag_name":' | \
@@ -41,7 +39,8 @@ RUN ATHENA_VERSION=$( \
     ) \
     && echo $ATHENA_VERSION \
     && wget -c https://api.github.com/repos/Helleberg/SensorSync-AthenaContainer/tarball/$ATHENA_VERSION -O - | \
-    tar -xz -C /usr/src/service/athena
+    tar -xz \
+    && mv /usr/src/service/Helleberg-SensorSync-AthenaContainer-* /usr/src/service/athena
 
 RUN chmod 777 /usr/src/service/athena
 RUN chmod 777 /usr/src/service/toit
