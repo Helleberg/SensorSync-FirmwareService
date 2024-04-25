@@ -10,6 +10,6 @@ all: ota.bin
 %.snapshot: ATHENA/%.toit
 	$(TOIT_COMPILE) -w $@ $<
 
-ota.bin: validate.snapshot
+ota.bin: athena.snapshot
 	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE)/firmware.envelope container install ATHENA $(ATHENA)/athena.snapshot
 	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE)/firmware.envelope extract --format=binary -o $(NEW_FIRMWARE)/ota.bin
