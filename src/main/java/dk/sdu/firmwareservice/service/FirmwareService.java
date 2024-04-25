@@ -34,6 +34,7 @@ public class FirmwareService {
         // Get device from device service
         try {
             DeviceDTO deviceDTO = deviceServiceInterface.getDevice(updateFirmwareRequest.getUuid());
+            System.out.println(deviceDTO);
 
             // Get the latest release version from toit repo
             try {
