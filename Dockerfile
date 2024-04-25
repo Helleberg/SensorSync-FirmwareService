@@ -47,4 +47,6 @@ RUN chmod 777 /usr/src/service/athena
 RUN chmod 777 /usr/src/service/toit
 RUN chmod 777 /usr/src/service/Makefile
 
+RUN cd /usr/src/service/athena/ && toit.pkg install
+
 ENTRYPOINT ["java", "-jar", "firmware-service.jar"]
