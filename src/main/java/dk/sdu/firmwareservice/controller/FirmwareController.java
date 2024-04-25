@@ -1,5 +1,6 @@
 package dk.sdu.firmwareservice.controller;
 
+import dk.sdu.firmwareservice.request_types.TokenBody;
 import dk.sdu.firmwareservice.request_types.UpdateFirmwareRequest;
 import dk.sdu.firmwareservice.service.FileProcessingService;
 import dk.sdu.firmwareservice.service.FirmwareService;
@@ -36,7 +37,7 @@ public class FirmwareController {
 
     @PostMapping("/firmware/update/{uuid}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateDeviceFirmware(@PathVariable("uuid") UUID uuid, @RequestBody String token) {
+    public void updateDeviceFirmware(@PathVariable("uuid") UUID uuid, @RequestBody TokenBody token) {
         firmwareService.updateFirmware(uuid, token);
     }
 

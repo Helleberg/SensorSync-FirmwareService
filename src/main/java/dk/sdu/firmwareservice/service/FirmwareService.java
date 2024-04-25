@@ -3,6 +3,7 @@ package dk.sdu.firmwareservice.service;
 import dk.sdu.firmwareservice.dto.DeviceDTO;
 import dk.sdu.firmwareservice.feign.DeviceServiceInterface;
 import dk.sdu.firmwareservice.feign.MessageServiceInterface;
+import dk.sdu.firmwareservice.request_types.TokenBody;
 import dk.sdu.firmwareservice.request_types.UpdateFirmwareRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class FirmwareService {
     @Autowired
     private MessageServiceInterface messageServiceInterface;
 
-    public void updateFirmware(UUID uuid, String token) {
+    public void updateFirmware(UUID uuid, TokenBody token) {
         // Get device information from device service.
         DeviceDTO device = getDeviceData(uuid);
 
@@ -47,7 +48,7 @@ public class FirmwareService {
                 UpdateFirmwareRequest request = new UpdateFirmwareRequest();
                 request.setFirmware_version(latestToitVersion);
                 request.setUuid(uuid);
-                request.setToken(token);
+                request.setToken(token.getToken());
                 messageServiceInterface.updateFirmware(request);
             }
         }
