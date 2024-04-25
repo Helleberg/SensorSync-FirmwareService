@@ -1,12 +1,17 @@
 package dk.sdu.firmwareservice.controller;
 
 import dk.sdu.firmwareservice.request_types.UpdateFirmwareRequest;
+import dk.sdu.firmwareservice.service.FileProcessingService;
 import dk.sdu.firmwareservice.service.FirmwareService;
 import dk.sdu.firmwareservice.service.GitHubService;
+import jakarta.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -16,6 +21,8 @@ import java.util.UUID;
 public class FirmwareController {
     private static final Logger log = LoggerFactory.getLogger(FirmwareService.class);
 
+    @Autowired
+    FileProcessingService fileProcessingService;
     @Autowired
     GitHubService gitHubService;
     @Autowired
@@ -31,6 +38,17 @@ public class FirmwareController {
     @ResponseStatus(HttpStatus.OK)
     public void updateDeviceFirmware(@PathVariable("uuid") UUID uuid, @RequestBody String token) {
         firmwareService.updateFirmware(uuid, token);
+    }
+
+    @GetMapping(value = "/firmware/download/{uuid}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> downloadFirmware(@PathVariable("uuid") UUID uuid) {
+        Resource file = fileProcessingService.downloadFirmware(uuid);
+        if (file == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(file);
+        }
     }
 
     // GET ALL FIRMWARE RELEASES
