@@ -1,6 +1,5 @@
 package dk.sdu.firmwareservice.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import dk.sdu.firmwareservice.dto.DeviceDTO;
 import dk.sdu.firmwareservice.feign.DeviceServiceInterface;
 import dk.sdu.firmwareservice.feign.MessageServiceInterface;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
 @Component
@@ -28,60 +28,45 @@ public class FirmwareService {
     @Autowired
     private MessageServiceInterface messageServiceInterface;
 
-    public void updateFirmware(UpdateFirmwareRequest updateFirmwareRequest) {
-        String toitVersion = "";
+    public void updateFirmware(UUID uuid, String token) {
+        // Get device information from device service.
+        DeviceDTO device = getDeviceData(uuid);
 
-        // Get device from device service
-        try {
-            DeviceDTO deviceDTO = deviceServiceInterface.getDevice(updateFirmwareRequest.getUuid());
-            System.out.println(deviceDTO);
+        // Get the latest toit firmware version.
+        String latestToitVersion = latestToitVersion();
 
-            // Get the latest release version from toit repo
-            try {
-                System.out.println("Check if update is given");
-                // Check if update version is given by the user
-                if (!updateFirmwareRequest.getToit_firmware_version().isEmpty()) {
-                    toitVersion = updateFirmwareRequest.getToit_firmware_version();
-                } else {
-                    toitVersion = gitHubService.getLatestToitRelease();
-                }
-                System.out.println("Toit version: " + toitVersion);
-                if (toitVersion != null && !toitVersion.isEmpty() && updateFirmwareRequest.getUuid() != null) {
+        // Check if latest toit firmware version is newer than the device firmware.
+        if (formatFirmwareVersion(latestToitVersion) > formatFirmwareVersion(device.getToit_firmware_version())) {
+            // Generate the firmware update file
+            Boolean isFirmwareGenerated = generateFirmware(latestToitVersion);
+            if (isFirmwareGenerated) {
+                // When the firmware has been generated send a message through the MessageService
+                // to allow the device to begin updating.
 
-                    // This check relies on Toit not changing their version syntax.
-                    // Might need to be checked and made in another way for stability of this system.
-                    if (Integer.parseInt(toitVersion.substring(toitVersion.lastIndexOf('.') + 1)) > Integer.parseInt(deviceDTO.getToit_firmware_version().substring(deviceDTO.getToit_firmware_version().lastIndexOf('.') + 1))) {
-                        Boolean isFirmwareGenerated = generateFirmware(toitVersion, String.valueOf(updateFirmwareRequest.getUuid()));
-
-                        if (isFirmwareGenerated) {
-                            // TODO: implement logic to serve the firmware to the esp32 with the correct device UUID.
-                            // "Firmware was generated successfully" return is temp and will be removed when sering the firmware is implemented.
-                            messageServiceInterface.updateFirmware(updateFirmwareRequest);
-
-                            log.warn("Firmware was generated successfully");
-                        } else {
-                            log.warn("Firmware not generated correctly");
-                        }
-                    } else {
-                        log.warn("Current device does not need to update firmware");
-                    }
-
-                } else {
-                    log.warn("Update information is missing...");
-                }
-
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                log.error(e.getMessage());
-                throw new RuntimeException(e);
+                // Generate the firmware update request
+                UpdateFirmwareRequest request = new UpdateFirmwareRequest();
+                request.setFirmware_version(latestToitVersion);
+                request.setUuid(uuid);
+                request.setToken(token);
+                messageServiceInterface.updateFirmware(request);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("Could not get device: {}", e.getMessage());
         }
     }
 
-    public Boolean generateFirmware(String firmwareVersion, String deviceUUID) {
+    // this expects the following version format: v2.0.0-alpha.146
+    private Integer formatFirmwareVersion(String firmwareVersion) {
+        return Integer.parseInt(firmwareVersion.substring(firmwareVersion.lastIndexOf('.') + 1));
+    }
+
+    private DeviceDTO getDeviceData(UUID uuid) {
+        return deviceServiceInterface.getDevice(uuid);
+    }
+
+    private String latestToitVersion() {
+        return gitHubService.getLatestToitRelease();
+    }
+
+    public Boolean generateFirmware(String firmwareVersion) {
         // TODO: Include ATHENA snapshot somewhere in this logic
         try {
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.

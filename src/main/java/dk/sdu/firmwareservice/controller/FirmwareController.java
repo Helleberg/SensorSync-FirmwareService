@@ -21,32 +21,22 @@ public class FirmwareController {
     @Autowired
     FirmwareService firmwareService;
 
+    @GetMapping("/firmware/latest")
+    @ResponseStatus(HttpStatus.OK)
+    public String getLatestVersion() {
+        return gitHubService.getLatestToitRelease();
+    }
+
+    @PostMapping("/firmware/update/{uuid}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateDeviceFirmware(@PathVariable("uuid") UUID uuid, @RequestBody String token) {
+        firmwareService.updateFirmware(uuid, token);
+    }
+
     // GET ALL FIRMWARE RELEASES
     @GetMapping("/firmware/toit/releases")
     @ResponseStatus(HttpStatus.OK)
     public void getAllFirmwareVersion() {
         // TODO: Implement logic that returns all version from a database or the repo releases.
-    }
-
-    // GET NEWEST TOIT FIRMWARE RELEASE
-    @GetMapping("/firmware/toit")
-    @ResponseStatus(HttpStatus.OK)
-    public String getFirmwareVersion() {
-        try {
-            return gitHubService.getLatestToitRelease();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
-
-    // UPDATE DEVICE WITH NEWEST FIRMWARE RELEASE
-    @PostMapping("/firmware/toit")
-    @ResponseStatus(HttpStatus.OK)
-    public void updateFirmware(@RequestBody UpdateFirmwareRequest updateFirmwareRequest) {
-        try {
-            firmwareService.updateFirmware(updateFirmwareRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
     }
 }
