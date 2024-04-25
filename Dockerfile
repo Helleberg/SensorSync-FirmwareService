@@ -8,8 +8,14 @@ ENV PATH="/usr/src/service/toit/bin:${PATH}"
 
 COPY ./target/firmware-service-*.jar firmware-service.jar
 
-COPY ./validate.toit validate.toit
 COPY ./Makefile Makefile
+
+RUN mkdir /usr/src/service/toit_firmware
+
+RUN apt-get update && apt-get install -y  \
+    curl \
+    make \
+    wget
 
 RUN apt-get update && \
     apt-get install -y openjdk-17-jdk ca-certificates-java && \
@@ -18,11 +24,6 @@ RUN apt-get update && \
 
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
 RUN export JAVA_HOME
-
-RUN apt-get update && apt-get install -y \
-curl \
-make \
-wget
 
 RUN TOIT_VERSION=$( \
     curl --silent "https://api.github.com/repos/toitlang/toit/releases/latest" | \
@@ -44,7 +45,6 @@ RUN ATHENA_VERSION=$( \
 
 RUN chmod 777 /usr/src/service/athena
 RUN chmod 777 /usr/src/service/toit
-RUN chmod 777 /usr/src/service/validate.toit
 RUN chmod 777 /usr/src/service/Makefile
 
 ENTRYPOINT ["java", "-jar", "firmware-service.jar"]

@@ -30,10 +30,16 @@ public class FirmwareController {
     @Autowired
     FirmwareService firmwareService;
 
-    @GetMapping("/firmware/latest")
+    @GetMapping("/firmware/toit/latest")
     @ResponseStatus(HttpStatus.OK)
-    public String getLatestVersion() {
+    public String getLatestToitVersion() {
         return gitHubService.getLatestToitRelease();
+    }
+
+    @GetMapping("/firmware/athena/latest")
+    @ResponseStatus(HttpStatus.OK)
+    public String getLatestAthenaVersion() {
+        return gitHubService.getLatestAthenaRelease();
     }
 
     @PostMapping("/firmware/update/{uuid}")

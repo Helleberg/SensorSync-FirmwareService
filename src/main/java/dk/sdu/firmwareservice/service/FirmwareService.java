@@ -72,9 +72,9 @@ public class FirmwareService {
         try {
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
-            downloadFile(envelopeUrl, "firmware.envelope.gz");
-            gunzipFile("firmware.envelope.gz", "firmware.envelope");
-            compileToitFile("validate.toit", "validate.snapshot");
+            downloadFile(envelopeUrl, "toit_firmware/firmware.envelope.gz");
+            gunzipFile("toit_firmware/firmware.envelope.gz", "toit_firmware/firmware.envelope");
+            generateFirmwareBin();
             return true;
         } catch (IOException e) {
             log.warn(e.getMessage());
@@ -112,7 +112,7 @@ public class FirmwareService {
         }
     }
 
-    private static void compileToitFile(String inputFile, String outputFile) throws IOException {
+    private static void generateFirmwareBin() throws IOException {
         System.out.println("Trying to compile...");
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("make");
