@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -43,12 +44,15 @@ public class FirmwareController {
 
     @GetMapping(value = "/firmware/download/{uuid}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> downloadFirmware(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<?> downloadFirmware(@PathVariable("uuid") UUID uuid) throws IOException {
         Resource file = fileProcessingService.downloadFirmware(uuid);
         if (file == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(file);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentLength(file.contentLength())
+                    .body(file);
         }
     }
 
