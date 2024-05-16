@@ -87,8 +87,9 @@ public class FirmwareService {
     private static void makeFirmwareFolder(UUID uuid) {
         // Create file for the firmware
         ProcessBuilder processBuilderNewDir = new ProcessBuilder();
-        processBuilderNewDir.command("mkdir "+ uuid.toString());
-        processBuilderNewDir.directory(new File(System.getProperty("user.dir") + "/toit_firmware/"));
+        processBuilderNewDir.command("mkdir", uuid.toString());
+        log.info("The current directory: {}", System.getProperty("user.dir"));
+        processBuilderNewDir.directory(new File("/usr/src/service/toit_firmware"));
 
         log.info("Creating firmware folder for device: {}", uuid);
         try {
