@@ -75,7 +75,7 @@ public class FirmwareService {
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
             downloadFile(envelopeUrl, firmwareVersion);
             gunzipFile(firmwareVersion);
-            generateFirmwareBin();
+            generateFirmwareBin(firmwareVersion);
             return true;
         } catch (IOException e) {
             log.warn(e.getMessage());
