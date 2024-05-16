@@ -5,9 +5,9 @@ TOIT_FIRMWARE := $(TOIT_SDK)/tools/firmware
 .PHONY: all
 all: ota.bin
 
-$(NEW_FIRMWARE_LOCATION)/%.snapshot: /usr/src/service/athena/%.toit
+/usr/src/service/athena/%.snapshot: /usr/src/service/athena/%.toit
 	$(TOIT_COMPILE) -w $@ $<
 
-ota.bin: /usr/src/service/toit_firmware/%.snapshot
-	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE_LOCATION)/firmware.envelope container install ATHENA $(NEW_FIRMWARE_LOCATION)/athena.snapshot
+ota.bin: /usr/src/service/athena/athena.snapshot
+	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE_LOCATION)/firmware.envelope container install ATHENA /usr/src/service/athena/athena.snapshot
 	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE_LOCATION)/firmware.envelope extract --format=binary -o $(NEW_FIRMWARE_LOCATION)/ota.bin
