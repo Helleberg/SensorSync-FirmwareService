@@ -25,4 +25,10 @@ public class FileProcessingServiceImpl implements FileProcessingService {
         }
         return null;
     }
+
+    @Override
+    public Resource deleteFirmware() {
+        // TODO: Delete installed firmware from the server.
+        return null;
+    }
 }

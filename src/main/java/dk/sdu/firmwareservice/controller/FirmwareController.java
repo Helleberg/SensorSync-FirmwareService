@@ -1,11 +1,9 @@
 package dk.sdu.firmwareservice.controller;
 
 import dk.sdu.firmwareservice.request_types.TokenBody;
-import dk.sdu.firmwareservice.request_types.UpdateFirmwareRequest;
 import dk.sdu.firmwareservice.service.FileProcessingService;
 import dk.sdu.firmwareservice.service.FirmwareService;
 import dk.sdu.firmwareservice.service.GitHubService;
-import jakarta.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +53,7 @@ public class FirmwareController {
         if (file == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
+            log.info("Returned OK (200) response with the firmware as content");
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .contentLength(file.contentLength())
@@ -67,5 +66,6 @@ public class FirmwareController {
     @ResponseStatus(HttpStatus.OK)
     public void getAllFirmwareVersion() {
         // TODO: Implement logic that returns all version from a database or the repo releases.
+        // Might not be in scope
     }
 }

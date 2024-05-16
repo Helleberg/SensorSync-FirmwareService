@@ -69,11 +69,12 @@ public class FirmwareService {
 
     public Boolean generateFirmware(String firmwareVersion) {
         // TODO: Include ATHENA snapshot somewhere in this logic
+        // Right know the latest ATHEA version just gets bundled with the new firmware.
         try {
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
-            downloadFile(envelopeUrl, "toit_firmware/firmware.envelope.gz");
-            gunzipFile("toit_firmware/firmware.envelope.gz", "toit_firmware/firmware.envelope");
+            downloadFile(envelopeUrl, firmwareVersion);
+            gunzipFile(firmwareVersion);
             generateFirmwareBin();
             return true;
         } catch (IOException e) {
@@ -82,12 +83,12 @@ public class FirmwareService {
         }
     }
 
-    private static void downloadFile(String urlStr, String fileName) throws IOException {
+    private static void downloadFile(String urlStr, String firmwareVersion) throws IOException {
         URL url = new URL(urlStr);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         try (InputStream in = connection.getInputStream();
-             FileOutputStream out = new FileOutputStream(fileName)) {
+             FileOutputStream out = new FileOutputStream("toit_firmware/" + firmwareVersion + "/firmware.envelope.gz")) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
@@ -98,10 +99,10 @@ public class FirmwareService {
         }
     }
 
-    private static void gunzipFile(String inputFileName, String outputFileName) throws IOException {
-        try (FileInputStream fis = new FileInputStream(inputFileName);
+    private static void gunzipFile(String firmwareVersion) throws IOException {
+        try (FileInputStream fis = new FileInputStream("toit_firmware/" + firmwareVersion + "/firmware.envelope.gz");
              GZIPInputStream gis = new GZIPInputStream(fis);
-             FileOutputStream fos = new FileOutputStream(outputFileName)) {
+             FileOutputStream fos = new FileOutputStream("toit_firmware/" + firmwareVersion + "/firmware.envelope")) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = gis.read(buffer)) != -1) {
@@ -112,10 +113,11 @@ public class FirmwareService {
         }
     }
 
-    private static void generateFirmwareBin() throws IOException {
+    private static void generateFirmwareBin(String firmwareVersion) throws IOException {
         System.out.println("Trying to compile...");
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("make");
+        String firmwarePath = "/usr/src/service/toit_firmware/" + firmwareVersion;
+        processBuilder.command("make NEW_FIRMWARE_LOCATION=" + firmwarePath);
         processBuilder.directory(new File(System.getProperty("user.dir")));
 
         try {
