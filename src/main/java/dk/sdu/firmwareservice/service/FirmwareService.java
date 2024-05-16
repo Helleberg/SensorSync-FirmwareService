@@ -157,7 +157,7 @@ public class FirmwareService {
             if (exitCode == 0) {
                 log.info("Compilation successful for device: {}", uuid);
             } else {
-                log.error("Compilation successful for device: {} - with exit code: {}", uuid, exitCode);
+                log.error("Compilation failed for device: {} - with exit code: {}", uuid, exitCode);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
