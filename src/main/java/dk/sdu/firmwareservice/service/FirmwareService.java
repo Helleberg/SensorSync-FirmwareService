@@ -148,8 +148,8 @@ public class FirmwareService {
         log.info("Trying to compile... for device: {}", uuid);
         ProcessBuilder processBuilder = new ProcessBuilder();
         String firmwarePath = "/usr/src/service/toit_firmware/" + uuid.toString();
-        processBuilder.command("make NEW_FIRMWARE_LOCATION=" + firmwarePath);
-        processBuilder.directory(new File(System.getProperty("user.dir")));
+        processBuilder.command("make", "NEW_FIRMWARE_LOCATION=" + firmwarePath);
+        processBuilder.directory(new File("/usr/src/service"));
 
         try {
             Process process = processBuilder.start();
