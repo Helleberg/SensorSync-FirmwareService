@@ -114,6 +114,28 @@ public class FirmwareService {
     }
 
     private static void generateFirmwareBin(String firmwareVersion) throws IOException {
+        // Create file for the firmware
+        ProcessBuilder processBuilderNewDir = new ProcessBuilder();
+        processBuilderNewDir.command("mkdir "+ firmwareVersion);
+        processBuilderNewDir.directory(new File(System.getProperty("user.dir") + "/toit_firmware"));
+
+        try {
+            Process process = processBuilderNewDir.start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Create dir: " + firmwareVersion);
+            } else {
+                System.out.println("Could not create dir - exit code: " + exitCode);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            System.err.println("Creation interrupted: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Run make file to compile
         System.out.println("Trying to compile...");
         ProcessBuilder processBuilder = new ProcessBuilder();
         String firmwarePath = "/usr/src/service/toit_firmware/" + firmwareVersion;

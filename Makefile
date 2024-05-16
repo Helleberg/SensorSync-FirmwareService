@@ -1,4 +1,3 @@
-NEW_FIRMWARE_LOCATION := /usr/src/service/toit_firmware
 TOIT_SDK := /usr/src/service/toit
 TOIT_COMPILE := $(TOIT_SDK)/bin/toit.compile
 TOIT_FIRMWARE := $(TOIT_SDK)/tools/firmware
