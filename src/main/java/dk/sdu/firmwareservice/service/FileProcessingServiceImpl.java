@@ -12,7 +12,7 @@ public class FileProcessingServiceImpl implements FileProcessingService {
     @Override
     public Resource downloadFirmware(UUID uuid) {
         // TODO: Use the UUID when files are stored in /uuid (The file should be uuid.bin not ota.bin)
-        File dir = new File("toit_firmware/ota.bin");
+        File dir = new File("toit_firmware/" + uuid + "/ota.bin");
 
         try {
             if (dir.exists()) {

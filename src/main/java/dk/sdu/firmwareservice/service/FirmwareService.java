@@ -77,6 +77,8 @@ public class FirmwareService {
             downloadFile(envelopeUrl, uuid);
             gunzipFile(uuid);
             generateFirmwareBin(uuid);
+
+            // TODO: Only return true if all of the above was successful.
             return true;
         } catch (IOException e) {
             log.warn(e.getMessage());
@@ -88,7 +90,6 @@ public class FirmwareService {
         // Create file for the firmware
         ProcessBuilder processBuilderNewDir = new ProcessBuilder();
         processBuilderNewDir.command("mkdir", uuid.toString());
-        log.info("The current directory: {}", System.getProperty("user.dir"));
         processBuilderNewDir.directory(new File("/usr/src/service/toit_firmware"));
 
         log.info("Creating firmware folder for device: {}", uuid);
@@ -122,6 +123,7 @@ public class FirmwareService {
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
             }
+            log.info("Firmware file downloaded for device: {}", uuid);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -138,6 +140,7 @@ public class FirmwareService {
             while ((bytesRead = gis.read(buffer)) != -1) {
                 fos.write(buffer, 0, bytesRead);
             }
+            log.info("Firmware file unzipped for device: {}", uuid);
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
