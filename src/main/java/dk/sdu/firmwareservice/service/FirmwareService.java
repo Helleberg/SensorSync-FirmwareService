@@ -69,7 +69,7 @@ public class FirmwareService {
 
     public Boolean generateFirmware(String firmwareVersion, UUID uuid) {
         // TODO: Include ATHENA snapshot somewhere in this logic
-        // Right know the latest ATHEA version just gets bundled with the new firmware.
+        // Right know the latest ATHENA version just gets bundled with the new firmware.
         try {
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
