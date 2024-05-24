@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -54,28 +58,19 @@ public class FirmwareService {
         }
     }
 
-    // this expects the following version format: v2.0.0-alpha.146
-    private Integer formatFirmwareVersion(String firmwareVersion) {
-        return Integer.parseInt(firmwareVersion.substring(firmwareVersion.lastIndexOf('.') + 1));
-    }
-
-    private DeviceDTO getDeviceData(UUID uuid) {
-        return deviceServiceInterface.getDevice(uuid);
-    }
-
-    private String latestToitVersion() {
-        return gitHubService.getLatestToitRelease();
-    }
-
     public Boolean generateFirmware(String firmwareVersion, UUID uuid) {
         // TODO: Include ATHENA snapshot somewhere in this logic
         // Right know the latest ATHENA version just gets bundled with the new firmware.
         try {
+            // Check if the Firmwaer services Toit version is the latest
+            // Download new one if not
+            updateFrimwareServiceToitVersion(firmwareVersion);
+
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
             makeFirmwareFolder(uuid);
-            downloadFile(envelopeUrl, uuid);
-            gunzipFile(uuid);
+            downloadFile(envelopeUrl, "toit_firmware/" + uuid + "/firmware.envelope.gz");
+            gunzipFile("toit_firmware/" + uuid + "/firmware.envelope.gz", "toit_firmware/" + uuid + "/firmware.envelope");
             generateFirmwareBin(uuid);
 
             // TODO: Only return true if all of the above was successful.
@@ -83,6 +78,56 @@ public class FirmwareService {
         } catch (IOException e) {
             log.warn(e.getMessage());
             return false;
+        }
+    }
+
+    private static void updateFrimwareServiceToitVersion(String firmwareVersion) throws IOException {
+        if (getFrimwareServiceToitVersion() != null) {
+            if (formatFirmwareVersion(firmwareVersion) > formatFirmwareVersion(getFrimwareServiceToitVersion())) {
+                // Delete old version
+                deleteDirectoryContent(Paths.get("toit/"));
+                log.info("Firmware service old Toit version deleted");
+
+                // Download new version
+                downloadFile("https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/toit-linux.tar.gz", "/toit/toit-linux.tar.gz");
+                log.info("Firmware service new Toit version download");
+
+                // Extract new version
+                gunzipFile("toit/toit-linux.tar.gz", "toit/");
+                log.info("Firmware service new Toit version unzip and ready to use");
+            }
+        } else {
+            log.warn("Could not find Service Toit version file");
+        }
+    }
+
+    private static String getFrimwareServiceToitVersion() {
+        try (BufferedReader br = new BufferedReader(new FileReader("/usr/src/service/toit/VERSION"))) {
+            if (br.readLine() != null) {
+                return br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static void deleteDirectoryContent(Path dirPath) {
+        if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+            throw new IllegalArgumentException("The provided path is either non-existent or not a directory.");
+        }
+
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath)) {
+            for (Path path : directoryStream) {
+                if (Files.isDirectory(path)) {
+                    deleteDirectoryContent(path);
+                }
+                Files.delete(path);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -110,37 +155,37 @@ public class FirmwareService {
         }
     }
 
-    private static void downloadFile(String urlStr, UUID uuid) throws IOException {
-        log.info("Downloading firmware file for device: {}", uuid);
+    private static void downloadFile(String urlStr, String outputPath) throws IOException {
+        log.info("Downloading firmware file");
 
         URL url = new URL(urlStr);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         try (InputStream in = connection.getInputStream();
-             FileOutputStream out = new FileOutputStream("toit_firmware/" + uuid + "/firmware.envelope.gz")) {
+             FileOutputStream out = new FileOutputStream(outputPath)) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
             }
-            log.info("Firmware file downloaded for device: {}", uuid);
+            log.info("Firmware file downloaded");
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
     }
 
-    private static void gunzipFile(UUID uuid) throws IOException {
-        log.info("Unzipping firmware file for device: {}", uuid);
+    private static void gunzipFile(String inputFile, String output) throws IOException {
+        log.info("Unzipping firmware file");
 
-        try (FileInputStream fis = new FileInputStream("toit_firmware/" + uuid + "/firmware.envelope.gz");
+        try (FileInputStream fis = new FileInputStream(inputFile);
              GZIPInputStream gis = new GZIPInputStream(fis);
-             FileOutputStream fos = new FileOutputStream("toit_firmware/" + uuid + "/firmware.envelope")) {
+             FileOutputStream fos = new FileOutputStream(output)) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = gis.read(buffer)) != -1) {
                 fos.write(buffer, 0, bytesRead);
             }
-            log.info("Firmware file unzipped for device: {}", uuid);
+            log.info("Firmware file unzipped");
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
@@ -169,5 +214,18 @@ public class FirmwareService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // this expects the following version format: v2.0.0-alpha.146
+    private static Integer formatFirmwareVersion(String firmwareVersion) {
+        return Integer.parseInt(firmwareVersion.substring(firmwareVersion.lastIndexOf('.') + 1));
+    }
+
+    private DeviceDTO getDeviceData(UUID uuid) {
+        return deviceServiceInterface.getDevice(uuid);
+    }
+
+    private String latestToitVersion() {
+        return gitHubService.getLatestToitRelease();
     }
 }
