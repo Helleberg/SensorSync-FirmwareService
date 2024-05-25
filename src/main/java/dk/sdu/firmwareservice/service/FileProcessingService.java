@@ -6,5 +6,5 @@ import java.util.UUID;
 
 public interface FileProcessingService {
     Resource downloadFirmware(UUID uuid);
-    Resource deleteFirmware();
+    boolean deleteFirmware(String path);
 }

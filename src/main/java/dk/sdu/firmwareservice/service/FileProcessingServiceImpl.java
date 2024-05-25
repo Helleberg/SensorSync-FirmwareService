@@ -7,6 +7,9 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.UUID;
 
 @Service
@@ -15,7 +18,6 @@ public class FileProcessingServiceImpl implements FileProcessingService {
 
     @Override
     public Resource downloadFirmware(UUID uuid) {
-        // TODO: Use the UUID when files are stored in /uuid (The file should be uuid.bin not ota.bin)
         File dir = new File("toit_firmware/" + uuid + "/ota.bin");
 
         try {
@@ -32,8 +34,33 @@ public class FileProcessingServiceImpl implements FileProcessingService {
     }
 
     @Override
-    public Resource deleteFirmware() {
-        // TODO: Delete installed firmware from the server.
-        return null;
+    public boolean deleteFirmware(String path) {
+        File dir = new File(path);
+
+        try {
+            if (dir.exists() && dir.isDirectory()) {
+                deleteDirectoryRecursively(dir.toPath());
+                log.info("Successfully deleted firmware directory: " + dir.getAbsolutePath());
+                return true;
+            } else {
+                log.warn("Firmware directory does not exist: " + dir.getAbsolutePath());
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("Error deleting firmware directory: " + dir.getAbsolutePath(), e);
+            return false;
+        }
+    }
+
+    private void deleteDirectoryRecursively(Path path) throws Exception {
+        Files.walk(path)
+                .sorted(Comparator.reverseOrder()) // Sort in reverse order to delete files before directories
+                .forEach(p -> {
+                    try {
+                        Files.delete(p);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error deleting file: " + p.toString(), e);
+                    }
+                });
     }
 }

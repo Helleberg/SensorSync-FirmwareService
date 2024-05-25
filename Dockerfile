@@ -12,6 +12,8 @@ COPY ./Makefile Makefile
 
 RUN mkdir /usr/src/service/toit_firmware
 
+RUN mkdir /usr/src/service/toit
+
 RUN apt-get update && apt-get install -y  \
     curl \
     make \
@@ -25,13 +27,14 @@ RUN apt-get update && \
 ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
 RUN export JAVA_HOME
 
-RUN TOIT_VERSION=$( \
-    curl --silent "https://api.github.com/repos/toitlang/toit/releases/latest" | \
-    grep '"tag_name":' | \
-    sed -E 's/.*"([^"]+)".*/\1/' \
-    ) \
-    && echo $TOIT_VERSION \
-    && wget -c https://github.com/toitlang/toit/releases/download/$TOIT_VERSION/toit-linux.tar.gz -O - | tar -xz
+# RUN TOIT_VERSION=$( \
+#     curl --silent "https://api.github.com/repos/toitlang/toit/releases/latest" | \
+#     grep '"tag_name":' | \
+#     sed -E 's/.*"([^"]+)".*/\1/' \
+#     ) \
+#     && echo $TOIT_VERSION \
+#     && wget -c https://github.com/toitlang/toit/releases/download/$TOIT_VERSION/toit-linux.tar.gz -O - | \
+#     tar -xz
 
 RUN ATHENA_VERSION=$( \
     curl --silent "https://api.github.com/repos/Helleberg/SensorSync-AthenaContainer/releases/latest" | \

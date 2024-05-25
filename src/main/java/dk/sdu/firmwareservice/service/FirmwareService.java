@@ -33,6 +33,9 @@ public class FirmwareService {
     @Autowired
     private MessageServiceInterface messageServiceInterface;
 
+    @Autowired
+    static FileProcessingService fileProcessingService;
+
     public void updateFirmware(UUID uuid, TokenBody token) {
         // Get device information from device service.
         DeviceDTO device = getDeviceData(uuid);
@@ -62,7 +65,7 @@ public class FirmwareService {
         // TODO: Include ATHENA snapshot somewhere in this logic
         // Right know the latest ATHENA version just gets bundled with the new firmware.
         try {
-            // Check if the Firmwaer services Toit version is the latest
+            // Check if the Firmware services Toit version is the latest
             // Download new one if not
             updateFrimwareServiceToitVersion(firmwareVersion);
 
@@ -82,28 +85,39 @@ public class FirmwareService {
     }
 
     private static void updateFrimwareServiceToitVersion(String firmwareVersion) throws IOException {
-        if (getFrimwareServiceToitVersion() != null) {
-            if (formatFirmwareVersion(firmwareVersion) > formatFirmwareVersion(getFrimwareServiceToitVersion())) {
-                // Delete old version
-                deleteDirectoryContent(Paths.get("toit/"));
-                log.info("Firmware service old Toit version deleted");
+        File dir = new File("toit");
 
-                // Download new version
-                downloadFile("https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/toit-linux.tar.gz", "/toit/toit-linux.tar.gz");
-                log.info("Firmware service new Toit version download");
+        if (dir.exists() && dir.isDirectory()) {
+            if (getFrimwareServiceToitVersion() != null) {
+                if (formatFirmwareVersion(firmwareVersion) > formatFirmwareVersion(getFrimwareServiceToitVersion())) {
+                    // Delete old version
+                    if (fileProcessingService.deleteFirmware("toit")) {
+                        log.info("Firmware service old Toit version deleted");
+                    } else {
+                        log.warn("Could not delete Firmware service old Toit version");
+                    }
 
-                // Extract new version
-                gunzipFile("toit/toit-linux.tar.gz", "toit/");
-                log.info("Firmware service new Toit version unzip and ready to use");
+                    // Download new version
+                    downloadFile("https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/toit-linux.tar.gz", "/toit/toit-linux.tar.gz");
+                    log.info("Firmware service new Toit version download");
+
+                    // Extract new version
+                    gunzipFile("toit/toit-linux.tar.gz", "toit/");
+                    log.info("Firmware service new Toit version unzip and ready to use");
+                }
+            } else {
+                log.warn("Could not find Service Toit version file");
             }
         } else {
-            log.warn("Could not find Service Toit version file");
+            log.warn("Toit dir does not exist");
         }
+
     }
 
     private static String getFrimwareServiceToitVersion() {
-        try (BufferedReader br = new BufferedReader(new FileReader("/usr/src/service/toit/VERSION"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("toit/VERSION"))) {
             if (br.readLine() != null) {
+                log.info("Firmware Service Toit version: {}", br.readLine());
                 return br.readLine();
             }
         } catch (IOException e) {
@@ -111,24 +125,6 @@ public class FirmwareService {
         }
 
         return null;
-    }
-
-    private static void deleteDirectoryContent(Path dirPath) {
-        if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
-            throw new IllegalArgumentException("The provided path is either non-existent or not a directory.");
-        }
-
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dirPath)) {
-            for (Path path : directoryStream) {
-                if (Files.isDirectory(path)) {
-                    deleteDirectoryContent(path);
-                }
-                Files.delete(path);
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static void makeFirmwareFolder(UUID uuid) {
