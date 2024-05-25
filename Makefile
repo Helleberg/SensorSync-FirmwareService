@@ -8,6 +8,7 @@ all: ota.bin
 /usr/src/service/athena/%.snapshot: /usr/src/service/athena/%.toit
 	$(TOIT_COMPILE) -w $@ $<
 
-ota.bin: /usr/src/service/athena/athena.snapshot
+ota.bin: /usr/src/service/athena/athena.snapshot /usr/src/service/athena/validate.snapshot
+	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE_LOCATION)/firmware.envelope container install validate /usr/src/service/athena/validate.snapshot
 	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE_LOCATION)/firmware.envelope container install ATHENA /usr/src/service/athena/athena.snapshot
 	$(TOIT_FIRMWARE) -e $(NEW_FIRMWARE_LOCATION)/firmware.envelope extract --format=binary -o $(NEW_FIRMWARE_LOCATION)/ota.bin
