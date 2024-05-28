@@ -65,6 +65,9 @@ public class FirmwareService {
             // Download new one if not
             // updateFrimwareServiceToitVersion(firmwareVersion);
 
+            // Remove old firmware folder if it exists
+            fileProcessingService.deleteFirmware("toit_firmware/" + uuid);
+
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
             makeFirmwareFolder(uuid);

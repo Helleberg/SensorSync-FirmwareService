@@ -38,15 +38,15 @@ public class FileProcessingServiceImpl implements FileProcessingService {
     public void deleteFirmware(String path) {
         File dir = new File(path);
 
-        try {
-            if (dir.exists() && dir.isDirectory()) {
+        if (dir.exists() && dir.isDirectory()) {
+            try {
                 deleteDirectoryRecursively(dir.toPath());
                 log.info("Successfully deleted firmware directory: {}", dir.getAbsolutePath());
-            } else {
-                log.warn("Firmware directory does not exist: {}", dir.getAbsolutePath());
+            } catch (Exception e) {
+                log.error("Error deleting firmware directory: {}", dir.getAbsolutePath(), e);
             }
-        } catch (Exception e) {
-            log.error("Error deleting firmware directory: {}", dir.getAbsolutePath(), e);
+        } else {
+            log.warn("Firmware directory does not exist: {}", dir.getAbsolutePath());
         }
     }
 
