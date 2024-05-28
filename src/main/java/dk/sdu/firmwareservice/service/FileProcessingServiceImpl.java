@@ -7,6 +7,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -34,21 +35,18 @@ public class FileProcessingServiceImpl implements FileProcessingService {
     }
 
     @Override
-    public boolean deleteFirmware(String path) {
+    public void deleteFirmware(String path) {
         File dir = new File(path);
 
         try {
             if (dir.exists() && dir.isDirectory()) {
                 deleteDirectoryRecursively(dir.toPath());
                 log.info("Successfully deleted firmware directory: " + dir.getAbsolutePath());
-                return true;
             } else {
                 log.warn("Firmware directory does not exist: " + dir.getAbsolutePath());
-                return false;
             }
         } catch (Exception e) {
             log.error("Error deleting firmware directory: " + dir.getAbsolutePath(), e);
-            return false;
         }
     }
 

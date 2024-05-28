@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -91,11 +87,7 @@ public class FirmwareService {
             if (getFrimwareServiceToitVersion() != null) {
                 if (formatFirmwareVersion(firmwareVersion) > formatFirmwareVersion(getFrimwareServiceToitVersion())) {
                     // Delete old version
-                    if (fileProcessingService.deleteFirmware("toit")) {
-                        log.info("Firmware service old Toit version deleted");
-                    } else {
-                        log.warn("Could not delete Firmware service old Toit version");
-                    }
+                    fileProcessingService.deleteFirmware("toit");
 
                     // Download new version
                     downloadFile("https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/toit-linux.tar.gz", "/toit/toit-linux.tar.gz");

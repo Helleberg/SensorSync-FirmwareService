@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.UUID;
 
 @RestController
@@ -59,6 +60,13 @@ public class FirmwareController {
                     .contentLength(file.contentLength())
                     .body(file);
         }
+    }
+
+    // DELETE FIRMWARE FOLDER AFTER UPDATE
+    @GetMapping("/firmware/delete/{uuid}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteFirmwareVersion(@PathVariable("uuid") UUID uuid) {
+        fileProcessingService.deleteFirmware("toit_firmware/" + uuid);
     }
 
     // GET ALL FIRMWARE RELEASES
