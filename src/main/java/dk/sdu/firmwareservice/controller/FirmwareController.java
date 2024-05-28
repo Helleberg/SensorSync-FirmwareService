@@ -67,6 +67,7 @@ public class FirmwareController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteFirmwareVersion(@PathVariable("uuid") UUID uuid) {
         fileProcessingService.deleteFirmware("toit_firmware/" + uuid);
+        log.info("Returned OK (200) Firmware folder deleted");
     }
 
     // GET ALL FIRMWARE RELEASES
