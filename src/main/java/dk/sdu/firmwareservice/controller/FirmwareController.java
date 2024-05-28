@@ -62,14 +62,6 @@ public class FirmwareController {
         }
     }
 
-    // DELETE FIRMWARE FOLDER AFTER UPDATE
-    @GetMapping("/firmware/delete/{uuid}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteFirmwareVersion(@PathVariable("uuid") UUID uuid) {
-        fileProcessingService.deleteFirmware("toit_firmware/" + uuid);
-        log.info("Returned OK (200) Firmware folder deleted");
-    }
-
     // GET ALL FIRMWARE RELEASES
     @GetMapping("/firmware/toit/releases")
     @ResponseStatus(HttpStatus.OK)
