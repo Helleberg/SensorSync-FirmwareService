@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -58,23 +60,17 @@ public class FirmwareService {
     }
 
     public static void storeWiFiCredentials (String wifiSSID, String wifiPassword) {
-        String command = "sh -c echo '{ \"wifi\": { \"wifi.ssid\": \"" + wifiSSID + "\", \"wifi.password\": \"" + wifiPassword + "\" } }' > wifi.json";
+        String jsonContent = String.format(
+                "{ \"wifi\": { \"wifi.ssid\": \"%s\", \"wifi.password\": \"%s\" } }", wifiSSID, wifiPassword);
+
+        String filePath = "/usr/src/service/wifi.json";
 
         try {
-            // Execute the command
-            Process process = Runtime.getRuntime().exec(command);
-
-            // Wait for the process to complete
-            int exitCode = process.waitFor();
-
-            // Check the exit code
-            if (exitCode == 0) {
-                log.info("WiFi credentials stored successfully");
-            } else {
-                log.info("WiFi credentials stored failed {}", exitCode);
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            Files.write(Paths.get(filePath), jsonContent.getBytes());
+            log.info("WiFi file saved successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.warn("WiFi file saving failed.");
         }
     }
 
