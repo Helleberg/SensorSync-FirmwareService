@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpgradeBody {
     public String token;
+    public String host_ip;
     public String wifi_ssid;
     public String wifi_password;
 }
