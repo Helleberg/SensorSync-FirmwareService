@@ -44,7 +44,7 @@ RUN ATHENA_VERSION=$( \
     tar -xz \
     && mv /usr/src/service/Helleberg-SensorSync-AthenaContainer-* /usr/src/service/athena
 
-RUN ATHENA_VERSION=$( \
+RUN JAGUAR_VERSION=$( \
     curl --silent "https://api.github.com/repos/toitlang/jaguar/releases/latest" | \
     grep '"tag_name":' | \
     sed -E 's/.*"([^"]+)".*/\1/' \
