@@ -53,7 +53,7 @@ RUN JAGUAR_VERSION=$( \
     ) \
     && echo $JAGUAR_VERSION \
     && wget -c https://github.com/toitlang/jaguar/releases/download/$JAGUAR_VERSION/assets.tar.gz -O - | \
-    tar -xz
+    tar --transform='s|^assets|jaguar|' -xz
 
 RUN chmod 777 /usr/src/service/athena
 RUN chmod 777 /usr/src/service/jaguar
