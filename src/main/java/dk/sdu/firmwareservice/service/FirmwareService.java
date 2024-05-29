@@ -3,7 +3,7 @@ package dk.sdu.firmwareservice.service;
 import dk.sdu.firmwareservice.dto.DeviceDTO;
 import dk.sdu.firmwareservice.feign.DeviceServiceInterface;
 import dk.sdu.firmwareservice.feign.MessageServiceInterface;
-import dk.sdu.firmwareservice.request_types.TokenBody;
+import dk.sdu.firmwareservice.request_types.UpgradeBody;
 import dk.sdu.firmwareservice.request_types.UpdateFirmwareRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class FirmwareService {
     @Autowired
     static FileProcessingService fileProcessingService;
 
-    public void updateFirmware(UUID uuid, TokenBody token) {
+    public void updateFirmware(UUID uuid, UpgradeBody upgradeBody) {
         // Get device information from device service.
         DeviceDTO device = getDeviceData(uuid);
 
@@ -42,7 +42,7 @@ public class FirmwareService {
         // Check if latest toit firmware version is newer than the device firmware.
         if (formatFirmwareVersion(latestToitVersion) > formatFirmwareVersion(device.getToit_firmware_version())) {
             // Generate the firmware update file
-            Boolean isFirmwareGenerated = generateFirmware(latestToitVersion, uuid);
+            Boolean isFirmwareGenerated = generateFirmware(latestToitVersion, uuid, upgradeBody.getWifi_ssid(), upgradeBody.getWifi_password());
             if (isFirmwareGenerated) {
                 // When the firmware has been generated send a message through the MessageService
                 // to allow the device to begin updating.
@@ -51,13 +51,34 @@ public class FirmwareService {
                 UpdateFirmwareRequest request = new UpdateFirmwareRequest();
                 request.setFirmware_version(latestToitVersion);
                 request.setUuid(uuid);
-                request.setToken(token.getToken());
+                request.setToken(upgradeBody.getToken());
                 messageServiceInterface.updateFirmware(request);
             }
         }
     }
 
-    public Boolean generateFirmware(String firmwareVersion, UUID uuid) {
+    public static void storeWiFiCredentials (String wifiSSID, String wifiPassword) {
+        String command = "sh -c echo '{ \"wifi\": { \"wifi.ssid\": \"" + wifiSSID + "\", \"wifi.password\": \"" + wifiPassword + "\" } }' > wifi.json";
+
+        try {
+            // Execute the command
+            Process process = Runtime.getRuntime().exec(command);
+
+            // Wait for the process to complete
+            int exitCode = process.waitFor();
+
+            // Check the exit code
+            if (exitCode == 0) {
+                log.info("WiFi credentials stored successfully");
+            } else {
+                log.info("WiFi credentials stored failed {}", exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Boolean generateFirmware(String firmwareVersion, UUID uuid, String wifiSSID, String wifiPassword) {
         // TODO: Include ATHENA snapshot somewhere in this logic
         // Right know the latest ATHENA version just gets bundled with the new firmware.
         try {
@@ -71,6 +92,7 @@ public class FirmwareService {
             // fileProcessingService.deleteFirmware("toit_firmware/" + uuid);
 
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
+            storeWiFiCredentials(wifiSSID, wifiPassword);
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
             makeFirmwareFolder(uuid);
             downloadFile(envelopeUrl, "toit_firmware/" + uuid + "/firmware.envelope.gz");

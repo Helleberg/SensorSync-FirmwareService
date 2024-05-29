@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TokenBody {
+public class UpgradeBody {
     public String token;
+    public String wifi_ssid;
+    public String wifi_password;
 }

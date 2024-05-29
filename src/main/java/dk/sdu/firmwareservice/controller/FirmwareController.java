@@ -1,6 +1,6 @@
 package dk.sdu.firmwareservice.controller;
 
-import dk.sdu.firmwareservice.request_types.TokenBody;
+import dk.sdu.firmwareservice.request_types.UpgradeBody;
 import dk.sdu.firmwareservice.service.FileProcessingService;
 import dk.sdu.firmwareservice.service.FirmwareService;
 import dk.sdu.firmwareservice.service.GitHubService;
@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.UUID;
 
 @RestController
@@ -43,8 +42,8 @@ public class FirmwareController {
 
     @PostMapping("/firmware/update/{uuid}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateDeviceFirmware(@PathVariable("uuid") UUID uuid, @RequestBody TokenBody token) {
-        firmwareService.updateFirmware(uuid, token);
+    public void updateDeviceFirmware(@PathVariable("uuid") UUID uuid, @RequestBody UpgradeBody upgradeBody) {
+        firmwareService.updateFirmware(uuid, upgradeBody);
     }
 
     @GetMapping(value = "/firmware/download/{uuid}")
