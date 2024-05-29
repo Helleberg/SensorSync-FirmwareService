@@ -12,8 +12,6 @@ COPY ./Makefile Makefile
 
 RUN mkdir /usr/src/service/toit_firmware
 
-RUN mkdir /usr/src/service/jaguar
-
 RUN apt-get update && apt-get install -y  \
     curl \
     make \
@@ -46,17 +44,7 @@ RUN ATHENA_VERSION=$( \
     tar -xz \
     && mv /usr/src/service/Helleberg-SensorSync-AthenaContainer-* /usr/src/service/athena
 
-RUN JAGUAR_VERSION=$( \
-    curl --silent "https://api.github.com/repos/toitlang/jaguar/releases/latest" | \
-    grep '"tag_name":' | \
-    sed -E 's/.*"([^"]+)".*/\1/' \
-    ) \
-    && echo $JAGUAR_VERSION \
-    && wget -c https://github.com/toitlang/jaguar/releases/download/$JAGUAR_VERSION/assets.tar.gz -O - | \
-    tar --transform='s|^assets|jaguar|' -xz
-
 RUN chmod 777 /usr/src/service/athena
-RUN chmod 777 /usr/src/service/jaguar
 RUN chmod 777 /usr/src/service/toit
 RUN chmod 777 /usr/src/service/Makefile
 
