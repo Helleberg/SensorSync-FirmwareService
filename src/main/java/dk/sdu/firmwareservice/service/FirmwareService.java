@@ -12,9 +12,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 
@@ -59,6 +62,47 @@ public class FirmwareService {
         }
     }
 
+    public static void toitConfig () {
+        String host = "192.168.20.248";
+        int brokerPort = 1883;
+        int gatewayPort = 8285;
+        String brokerUser = "admin";
+        String brokerPass = "password";
+
+        try {
+            // Get the local host address
+            InetAddress localHost = InetAddress.getLocalHost();
+
+            // Get the IP address as a string
+            host = localHost.getHostAddress();
+
+            // Print the IP address
+            log.info("Host IP Address: {}", host);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            log.warn("Failed to get the host IP address.");
+        }
+
+        String filePath = "/usr/src/service/config.toit";
+        String content = String.format(
+                "HOST ::= \"%s\"\n" +
+                "BROKER_PORT ::= %d\n" +
+                "GATEWAY_PORT ::= %d\n" +
+                "BROKER_USER ::= \"%s\"" +
+                "BROKER_PASS ::= \"%s\"",
+                host, brokerPort, gatewayPort, brokerUser, brokerPass
+        );
+
+        try {
+            // Write the string to the file
+            Files.write(Paths.get(filePath), content.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            log.info("Toit Config written successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.warn("Failed to write Toit Config.");
+        }
+    }
+
     public static void storeWiFiCredentials (String wifiSSID, String wifiPassword) {
         String jsonContent = String.format(
                 "{ \"wifi\": { \"wifi.ssid\": \"%s\", \"wifi.password\": \"%s\" } }", wifiSSID, wifiPassword);
@@ -88,6 +132,7 @@ public class FirmwareService {
             // fileProcessingService.deleteFirmware("toit_firmware/" + uuid);
 
             // Concatenating the deviceUUID onto the filename to keep track of which device should download it.
+            toitConfig();
             storeWiFiCredentials(wifiSSID, wifiPassword);
             String envelopeUrl = "https://github.com/toitlang/toit/releases/download/" + firmwareVersion + "/firmware-esp32.gz";
             makeFirmwareFolder(uuid);
