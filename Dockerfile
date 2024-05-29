@@ -12,6 +12,8 @@ COPY ./Makefile Makefile
 
 RUN mkdir /usr/src/service/toit_firmware
 
+RUN mkdir /usr/src/service/jaguar
+
 RUN apt-get update && apt-get install -y  \
     curl \
     make \
