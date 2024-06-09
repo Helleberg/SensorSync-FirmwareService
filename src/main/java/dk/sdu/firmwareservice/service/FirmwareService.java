@@ -73,7 +73,7 @@ public class FirmwareService {
                 "HOST ::= \"%s\"\n" +
                 "BROKER_PORT ::= %d\n" +
                 "GATEWAY_PORT ::= %d\n" +
-                "BROKER_USER ::= \"%s\n" +
+                "BROKER_USER ::= \"%s\"\n" +
                 "BROKER_PASS ::= \"%s\"",
                 hostIP, brokerPort, gatewayPort, brokerUser, brokerPass
         );
