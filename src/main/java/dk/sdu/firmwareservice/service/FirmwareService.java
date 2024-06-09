@@ -68,7 +68,7 @@ public class FirmwareService {
         String brokerUser = "admin";
         String brokerPass = "password";
 
-        String filePath = "/usr/src/service/config.toit";
+        String filePath = "/usr/src/service/athena/config.toit";
         String content = String.format(
                 "HOST ::= \"%s\"\n" +
                 "BROKER_PORT ::= %d\n" +
