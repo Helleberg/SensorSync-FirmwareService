@@ -69,14 +69,14 @@ public class FirmwareService {
         String brokerPass = "password";
         int onBoardLedPin = 17;
 
-        String filePath = "/usr/src/service/config.toit";
+        String filePath = "/usr/src/service/athena/config.toit";
         String content = String.format(
                 "HOST ::= \"%s\"\n" +
                 "BROKER_PORT ::= %d\n" +
                 "GATEWAY_PORT ::= %d\n" +
                 "BROKER_USER ::= \"%s\"\n" +
                 "BROKER_PASS ::= \"%s\"\n" +
-                "ON_BOARD_LED_PIN ::= %d\n",
+                "ON_BOARD_LED_PIN ::= %d",
                 hostIP, brokerPort, gatewayPort, brokerUser, brokerPass, onBoardLedPin
         );
 
