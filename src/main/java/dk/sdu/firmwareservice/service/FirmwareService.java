@@ -67,15 +67,17 @@ public class FirmwareService {
         int gatewayPort = 8285;
         String brokerUser = "admin";
         String brokerPass = "password";
+        int onBoardLedPin = 17;
 
         String filePath = "/usr/src/service/config.toit";
         String content = String.format(
                 "HOST ::= \"%s\"\n" +
                 "BROKER_PORT ::= %d\n" +
                 "GATEWAY_PORT ::= %d\n" +
-                "BROKER_USER ::= \"%s\n" +
-                "BROKER_PASS ::= \"%s\"",
-                hostIP, brokerPort, gatewayPort, brokerUser, brokerPass
+                "BROKER_USER ::= \"%s\"\n" +
+                "BROKER_PASS ::= \"%s\"\n" +
+                "ON_BOARD_LED_PIN ::= %d\n",
+                hostIP, brokerPort, gatewayPort, brokerUser, brokerPass, onBoardLedPin
         );
 
         try {
